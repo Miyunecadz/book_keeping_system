@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\UserAuthenticationController;
 use Illuminate\Support\Facades\Route;
+use Tests\Feature\UserAuthenticationTest;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,4 +17,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::prefix('user')->group(function(){
+
+    Route::controller(UserAuthenticationController::class)->group(function(){
+        Route::get('login','login')->name('user.login');
+        Route::post('login','authenticate')->name('user.authenticate');
+    });
+
+    Route::middleware('auth')->group(function(){
+        Route::get('/', [UserAuthenticationController::class, 'dashboard'])->name('user.dashboard');
+    });
+
 });
