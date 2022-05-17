@@ -9,9 +9,8 @@ use Tests\TestCase;
 
 class UserAuthenticationTest extends TestCase
 {
-    /**
-     * @test
-     */
+    use RefreshDatabase;
+    
     public function testAccessIfUserLoginExist()
     {
         $response = $this->get(route('user.login'));
@@ -62,7 +61,7 @@ class UserAuthenticationTest extends TestCase
         $user= User::factory()->create();
 
         $response = $this->post(route('user.authenticate', [
-            'username' => $user->username
+            'username' => $user->email
         ]));
 
         $response->assertRedirect(route('user.login'));
@@ -74,6 +73,22 @@ class UserAuthenticationTest extends TestCase
     {
         $response = $this->post(route('user.authenticate'), [
             'username' => '1234',
+            'password' => '1234'
+        ]);
+
+        $response->assertRedirect(route('user.login'));
+        $response->assertSessionHasErrors(['username']);
+        $this->assertGuest();
+    }
+
+    public function testUnverifiedAccountCannotLoginEvenIfAccountExistOnDatabase()
+    {
+        $user = User::factory()->create([
+            'email_verified_at' => null
+        ]);
+
+        $response = $this->post(route('user.authenticate'), [
+            'username' => $user->username,
             'password' => '1234'
         ]);
 

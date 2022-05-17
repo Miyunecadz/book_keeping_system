@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Rules\AccountIsVerified;
+use App\Rules\EmailIsVerified;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -16,8 +19,10 @@ class UserAuthenticationController extends Controller
     public function authenticate(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'username' => 'required',
-            'password' => 'required'
+
+            'username' => ['required', new AccountIsVerified($request->username)],
+            'password' => 'required',
+
         ]);
 
         if($validator->fails())
